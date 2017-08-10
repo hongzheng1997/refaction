@@ -1,5 +1,7 @@
 Hong Zheng
 
+when I clone this to my local, it fails to get products. I found missing folder debug in refactor-me/bin/. not sure why. Once I add debug folder, it works fine.
+
 Datalayer:
 
 1. Create a Repository library project, copy Database.mdf and its log file from app_data into Repository folder.
