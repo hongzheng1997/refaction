@@ -11,6 +11,7 @@ namespace refactor_me.Models
         {
             var connstr = ConnectionString.Replace("{DataDirectory}", HttpContext.Current.Server.MapPath("~/App_Data"));
             return new SqlConnection(connstr);
-        }
+        }   
+             
     }
 }

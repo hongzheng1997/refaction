@@ -1,115 +1,261 @@
 ﻿using System;
-using System.Net;
 using System.Web.Http;
-using refactor_me.Models;
+using Repository;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net;
 
 namespace refactor_me.Controllers
 {
     [RoutePrefix("products")]
     public class ProductsController : ApiController
     {
-        [Route]
-        [HttpGet]
-        public Products GetAll()
-        {
-            return new Products();
-        }
 
-        [Route]
-        [HttpGet]
-        public Products SearchByName(string name)
-        {
-            return new Products(name);
-        }
+        #region Private fields
 
-        [Route("{id}")]
-        [HttpGet]
-        public Product GetProduct(Guid id)
-        {
-            var product = new Product(id);
-            if (product.IsNew)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+            private readonly ProductData _productRepository;
 
-            return product;
-        }
+        #endregion
 
-        [Route]
-        [HttpPost]
-        public void Create(Product product)
-        {
-            product.Save();
-        }
 
-        [Route("{id}")]
-        [HttpPut]
-        public void Update(Guid id, Product product)
-        {
-            var orig = new Product(id)
+        #region Constructor
+
+            public ProductsController()
             {
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                DeliveryPrice = product.DeliveryPrice
-            };
+                var conn = ConfigurationManager.ConnectionStrings["dbConnection"].ToString();
+                _productRepository = new ProductData(conn);
+            }
 
-            if (!orig.IsNew)
-                orig.Save();
-        }
+        #endregion
 
-        [Route("{id}")]
-        [HttpDelete]
-        public void Delete(Guid id)
-        {
-            var product = new Product(id);
-            product.Delete();
-        }
 
-        [Route("{productId}/options")]
-        [HttpGet]
-        public ProductOptions GetOptions(Guid productId)
-        {
-            return new ProductOptions(productId);
-        }
+        #region Public methods
 
-        [Route("{productId}/options/{id}")]
-        [HttpGet]
-        public ProductOption GetOption(Guid productId, Guid id)
-        {
-            var option = new ProductOption(id);
-            if (option.IsNew)
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-
-            return option;
-        }
-
-        [Route("{productId}/options")]
-        [HttpPost]
-        public void CreateOption(Guid productId, ProductOption option)
-        {
-            option.ProductId = productId;
-            option.Save();
-        }
-
-        [Route("{productId}/options/{id}")]
-        [HttpPut]
-        public void UpdateOption(Guid id, ProductOption option)
-        {
-            var orig = new ProductOption(id)
+            [Route]
+            [HttpGet]
+            public async Task<HttpResponseMessage>  GetAll()
             {
-                Name = option.Name,
-                Description = option.Description
-            };
+                try
+                {
+                    var products = await _productRepository.GetAllProducts();
+                    return Request.CreateResponse(HttpStatusCode.OK, products);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }                
+            }
 
-            if (!orig.IsNew)
-                orig.Save();
-        }
+            [Route]
+            [HttpGet]
+            public async Task<HttpResponseMessage> SearchByName(string name)
+            {          
+                try
+                {
+                    var products = await _productRepository.SearchProductsByName(name);
+                    if(products == null || products.Count == 0)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound, products);
+                    }
 
-        [Route("{productId}/options/{id}")]
-        [HttpDelete]
-        public void DeleteOption(Guid id)
-        {
-            var opt = new ProductOption(id);
-            opt.Delete();
-        }
+                    return Request.CreateResponse(HttpStatusCode.OK, products);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }
+            }
+
+            [Route("{id}")]
+            [HttpGet]
+            public async Task<HttpResponseMessage> GetProduct(Guid id)
+            {
+                try
+                {
+                    var product = await _productRepository.GetProductById(id);
+                    if (product == null)
+                    {
+                       return  Request.CreateResponse(HttpStatusCode.NotFound, product);
+                    }
+
+                    return Request.CreateResponse(HttpStatusCode.OK, product);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }
+            }
+
+            [Route]
+            [HttpPost]
+            public async Task<HttpResponseMessage> Create( Repository.Product product)
+            {
+                try
+                {
+                    var newId = await _productRepository.CreateProduct(product);
+                    return Request.CreateResponse(HttpStatusCode.OK, newId);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }
+            }
+
+            [Route("{id}")]
+            [HttpPut]
+            public async Task<HttpResponseMessage> Update(Repository.Product product)
+            {
+                try
+                {
+                    var existedProduct = await _productRepository.GetProductById(product.Id);
+
+                    if (existedProduct == null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound);
+                    }
+
+                    await _productRepository.UpdateProduct(product);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }
+            }
+
+            [Route("{id}")]
+            [HttpDelete]
+            public async Task<HttpResponseMessage> Delete(Guid id)
+            {
+                try
+                {
+                    var existedProduct = await _productRepository.GetProductById(id);
+                    if (existedProduct == null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound);
+                    }
+
+                    await _productRepository.DeleteProuct(id);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }
+            }
+
+            [Route("{productId}/options")]
+            [HttpGet]
+            public async Task<HttpResponseMessage> GetOptions(Guid productId)
+            {
+                try
+                {
+                    var productOptions = await _productRepository.GetProductOptionsByProductId(productId);
+
+                    if (productOptions == null || productOptions.Count == 0)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound, productOptions);
+                    }
+
+                    return Request.CreateResponse(HttpStatusCode.OK, productOptions);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }
+            }
+
+            [Route("{productId}/options/{id}")]
+            [HttpGet]
+            public async Task<HttpResponseMessage> GetOption(Guid id)
+            {
+                try
+                {
+                    var productOption = await _productRepository.GetProductOption(id);
+
+                    if (productOption == null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound, productOption);
+                    }
+
+                    return Request.CreateResponse(HttpStatusCode.OK, productOption);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }
+            }
+
+            [Route("{productId}/options")]
+            [HttpPost]
+            public async Task<HttpResponseMessage> CreateOption(Guid productId, Repository.ProductOption option)
+            {
+                try
+                {
+                    var product = await _productRepository.GetProductById(productId);
+
+                    if (product == null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound, "Product not existed in DB");
+                    }
+
+                    option.ProductId = productId;
+                    var newId = await _productRepository.CreateProductOption(option);
+                    return Request.CreateResponse(HttpStatusCode.OK, newId);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }            
+            }
+
+            [Route("{productId}/options/{id}")]
+            [HttpPut]
+            public async Task<HttpResponseMessage> UpdateOption(Guid id, Repository.ProductOption option)
+            {
+                option.Id = id;
+                try
+                {
+                    var existedProductOption = await _productRepository.GetProductOption(id);
+
+                    if (existedProductOption == null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound);
+                    }
+
+                    await _productRepository.UpdateProductOption(option);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }
+            }
+
+            [Route("{productId}/options/{id}")]
+            [HttpDelete]
+            public async Task<HttpResponseMessage> DeleteOption(Guid id)
+            {
+                try
+                {
+                    var existedProductOption = await _productRepository.GetProductOption(id);
+
+                    if (existedProductOption == null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound);
+                    }
+
+                    await _productRepository.DeleteProductOption(id);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+                catch (Exception ex)
+                {
+                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex);
+                }
+            }
+
+        #endregion
     }
 }

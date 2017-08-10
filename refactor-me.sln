@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "refactor-me", "refactor-me\refactor-me.csproj", "{20AB69F9-F2D3-4A68-96C3-424EC8B9406E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "Repository\Repository.csproj", "{1D5E5A70-754C-488F-9C2B-64145B8E7A6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductApi.Test", "ProductApi.Test\ProductApi.Test.csproj", "{F7238A9C-0D13-4AD1-8563-705CB188A905}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{20AB69F9-F2D3-4A68-96C3-424EC8B9406E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20AB69F9-F2D3-4A68-96C3-424EC8B9406E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20AB69F9-F2D3-4A68-96C3-424EC8B9406E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D5E5A70-754C-488F-9C2B-64145B8E7A6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D5E5A70-754C-488F-9C2B-64145B8E7A6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D5E5A70-754C-488F-9C2B-64145B8E7A6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D5E5A70-754C-488F-9C2B-64145B8E7A6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7238A9C-0D13-4AD1-8563-705CB188A905}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7238A9C-0D13-4AD1-8563-705CB188A905}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7238A9C-0D13-4AD1-8563-705CB188A905}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7238A9C-0D13-4AD1-8563-705CB188A905}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using Newtonsoft.Json;
+using Repository;
 
 namespace refactor_me.Models
 {
@@ -74,6 +75,7 @@ namespace refactor_me.Models
             Price = decimal.Parse(rdr["Price"].ToString());
             DeliveryPrice = decimal.Parse(rdr["DeliveryPrice"].ToString());
         }
+
 
         public void Save()
         {
